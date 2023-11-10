@@ -1,32 +1,67 @@
 // server.js
+
 const express = require('express');
+const path = require('path');
+const { PrismaClient } = require('@prisma/client');
+const bcrypt = require('bcrypt');
 const app = express();
-const PORT = process.env.PORT || 5000;
+const prisma = new PrismaClient();
 
 app.use(express.json());
 
-// Dummy quotes data
-const quotes = [
-  { id: 1, quote: "Life is what happens when you're busy making other plans.", author: "John Lennon" },
-  // ... 추가 명언들
-];
+// 회원가입
+app.post('/signup', async (req, res) => {
+  const { username, email, password } = req.body;
 
-// API to get a random quote
-app.get('/api/quote', (req, res) => {
-  const randomIndex = Math.floor(Math.random() * quotes.length);
-  const randomQuote = quotes[randomIndex];
-  res.json(randomQuote);
+  const salt = await bcrypt.genSalt(10);
+  const hashedPassword = await bcrypt.hash(password, salt);
+
+  try {
+    const user = await prisma.user.create({
+      data: {
+        username,
+        email,
+        password: hashedPassword,
+      },
+    });
+    res.status(201).json({ user });
+  } catch (error) {
+    res.status(400).json({ error: "User could not be created." });
+  }
 });
 
-// API to add a new quote
-app.post('/api/quote', (req, res) => {
-  const { quote, author } = req.body;
-  const newQuote = { id: quotes.length + 1, quote, author };
-  quotes.push(newQuote);
-  res.status(201).json(newQuote);
+// 로그인
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body;
+
+  try {
+    const user = await prisma.user.findUnique({
+      where: {
+        username,
+      },
+    });
+
+    if (!user || !await bcrypt.compare(password, user.password)) {
+      return res.status(400).json({ error: "Invalid credentials." });
+    }
+
+    // 로그인 성공 처리 (토큰 발행 등) 필요
+    res.status(200).json({ message: "Login successful!" });
+  } catch (error) {
+    res.status(500).json({ error: "Server error." });
+  }
 });
 
-// Start the server
+// Serve static files from the React app
+app.use(express.static(path.join(__dirname, 'client/build')));
+
+// The "catchall" handler: for any request that doesn't
+// match one above, send back React's index.html file.
+app.get('*', (req, res) => {
+  res.sendFile(path.join(__dirname+'/client/build/index.html'));
+});
+
+const PORT = process.env.PORT || 3001;
 app.listen(PORT, () => {
-  console.log(`Server listening on port ${PORT}`);
+  console.log(`Server is running on port ${PORT}.`);
 });
