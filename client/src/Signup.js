@@ -2,12 +2,16 @@
 
 import React, { useState } from 'react';
 
+
 export default function Signup() {
   const [form, setForm] = useState({
     username: '',
-    email: '',
+    nickname: '',
     password: '',
+    email: '',
   });
+
+  const [errorMessage, setErrorMessage] = useState('');
 
   const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
@@ -16,7 +20,7 @@ export default function Signup() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch('/signup', {
+      const response = await fetch('http://localhost:3001/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -24,18 +28,22 @@ export default function Signup() {
         body: JSON.stringify(form),
       });
       if (!response.ok) {
+        const errorResponse = await response.json();
+        console.error('Signup failed:', errorResponse);
         throw new Error('Signup failed');
       }
       // Handle success
     } catch (error) {
       // Handle errors
+      setErrorMessage(error.message); // 또는 적절한 오류 메시지
+
     }
   };
 
   return (
     <div>
       <h2>Signup</h2>
-      <form onSubmit={handleSubmit}>
+      {<form onSubmit={handleSubmit}>
         <input
           type="text"
           name="username"
@@ -45,11 +53,11 @@ export default function Signup() {
           required
         />
         <input
-          type="email"
-          name="email"
-          value={form.email}
+          type="text"
+          name="nickname"
+          value={form.nickname}
           onChange={handleChange}
-          placeholder="Email"
+          placeholder="Nickname"
           required
         />
         <input
@@ -60,8 +68,20 @@ export default function Signup() {
           placeholder="Password"
           required
         />
+        <input
+          type="email"
+          name="email"
+          value={form.email}
+          onChange={handleChange}
+          placeholder="Email"
+          
+        />
+        
         <button type="submit">Signup</button>
       </form>
+    }
+    {errorMessage && <div className="error-message">{errorMessage}</div>}
+
     </div>
   );
 }
