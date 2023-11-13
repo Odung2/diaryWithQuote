@@ -3,9 +3,16 @@
 const express = require('express');
 const path = require('path');
 const { PrismaClient } = require('@prisma/client');
+const cors = require('cors');
 const bcrypt = require('bcrypt');
 const app = express();
 const prisma = new PrismaClient();
+app.use(cors({
+  origin: "http://localhost:3000",
+  credentials: true,
+}));
+
+
 
 app.use(express.json());
 
