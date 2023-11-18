@@ -6,6 +6,10 @@ const { PrismaClient } = require('@prisma/client');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const app = express();
+const jwt = require('jsonwebtoken');
+require('dotenv').config();
+
+
 const prisma = new PrismaClient();
 app.use(cors({
   origin: "http://localhost:3000",
@@ -66,11 +70,18 @@ app.post('/login', async (req, res) => {
 
     if (!user || !await bcrypt.compare(password, user.password)) {
       return res.status(400).json({ error: "Invalid credentials." });
-    }
+    
 
-    // 로그인 성공 처리 (토큰 발행 등) 필요
-    res.status(200).json({ message: "Login successful!" });
+      // 로그인 성공 처리 (토큰 발행 등) 필요
+      // JWT 생성 (비밀키와 함께)
+      const jwt = require('jsonwebtoken');
+      const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
+      res.status(200).json({ message: "Login successful!" });
+    } else {
+      res.status(401).send('인증 실패: 사용자가 존재하지 않거나 비밀번호가 잘못되었습니다.');
+    }
   } catch (error) {
+    console.error(error);
     res.status(500).json({ error: "Server error." });
   }
 });
