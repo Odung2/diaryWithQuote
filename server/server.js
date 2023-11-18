@@ -12,13 +12,25 @@ app.use(cors({
   credentials: true,
 }));
 
-
+async function isUsernameTaken(username) {
+  const user = await prisma.user.findUnique({
+    where: {
+      username,
+    },
+  });
+  return user !== null;
+}
 
 app.use(express.json());
 
 // 회원가입
 app.post('/signup', async (req, res) => {
-  const { username, email, password } = req.body;
+  const { username, nickname, email, password } = req.body;
+
+  // `username` 중복 검사
+  if (await isUsernameTaken(username)) {
+    return res.status(400).json({ error: "Username is already taken." });
+  }
 
   const salt = await bcrypt.genSalt(10);
   const hashedPassword = await bcrypt.hash(password, salt);
@@ -27,13 +39,17 @@ app.post('/signup', async (req, res) => {
     const user = await prisma.user.create({
       data: {
         username,
+        nickname,
         email,
         password: hashedPassword,
       },
     });
     res.status(201).json({ user });
   } catch (error) {
+    console.error(error);
+
     res.status(400).json({ error: "User could not be created." });
+
   }
 });
 
@@ -60,12 +76,12 @@ app.post('/login', async (req, res) => {
 });
 
 // Serve static files from the React app
-app.use(express.static(path.join(__dirname, 'client/build')));
+app.use(express.static(path.join(__dirname, '../client/build')));
 
 // The "catchall" handler: for any request that doesn't
 // match one above, send back React's index.html file.
 app.get('*', (req, res) => {
-  res.sendFile(path.join(__dirname+'/client/build/index.html'));
+  res.sendFile(path.join(__dirname, '../client/build/index.html'));
 });
 
 const PORT = process.env.PORT || 3001;
