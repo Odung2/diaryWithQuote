@@ -67,16 +67,19 @@
 // };
 
 // export default App;
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import Signup from './Signup';
 import Login from './Login';
 
+
 const App = () => {
   const [quote, setQuote] = useState('');
   const [author, setAuthor] = useState('');
   const [diaryEntry, setDiaryEntry] = useState('');
+  const [isLoggedIn, setIsLoggedIn] = useState(false);
+
 
   // Fetch a random quote from the server
   const fetchQuote = async () => {
@@ -88,6 +91,14 @@ const App = () => {
       console.error('Error fetching the quote', error);
     }
   };
+
+  useEffect(() => {
+    // 여기서 로컬 스토리지나 쿠키 등을 확인하여 로그인 상태를 결정합니다.
+    const token = localStorage.getItem('token');
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, []);
 
   // Handle diary entry submission
   const submitDiaryEntry = async () => {
@@ -101,7 +112,7 @@ const App = () => {
     <Router>
       <div>
         <nav>
-          <Link to="/">Home</Link> | <Link to="/signup">Signup</Link> | <Link to="/login">Login</Link>
+          <Link to="/">Home</Link> |{ !isLoggedIn && <Link to="/signup">Signup</Link>} {!isLoggedIn && <Link to="/login">Login</Link>} {isLoggedIn && <Link to="/logout">Logout</Link>}
         </nav>
         <Routes>
           <Route path="/" element={
@@ -118,10 +129,10 @@ const App = () => {
             </>
           } />
           <Route path="/signup" element={<Signup />} />
-          <Route path="/login" element={<Login />} />
+          <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
 
         </Routes>
-      </div>
+      </div> 
     </Router>
   );
 };

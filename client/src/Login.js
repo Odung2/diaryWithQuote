@@ -1,8 +1,14 @@
 // Login.js
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom'; // useNavigate 훅 임포트
+import axios from 'axios';
 
-export default function Login() {
+
+
+export default function Login({setIsLoggedIn}) {
+  const navigate = useNavigate(); // useNavigate 훅 사용
+
   const [form, setForm] = useState({
     username: '',
     password: '',
@@ -13,22 +19,21 @@ export default function Login() {
   };
 
   const handleSubmit = async (e) => {
+    
     e.preventDefault();
     try {
-      const response = await fetch('/login', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(form),
-      });
-      if (!response.ok) {
-        throw new Error('Login failed');
+      const response = await axios.post('/login', form);
+      if (response.status === 200) {
+        const token = response.data.token;
+        localStorage.setItem('token', token);
+        setIsLoggedIn(true); // 로그인 상태 설정
       }
-      // Handle success
+      
     } catch (error) {
       // Handle errors
     }
+    // Handle success
+    navigate('/'); // 페이지 리디렉션
   };
 
   return (
