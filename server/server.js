@@ -68,16 +68,16 @@ app.post('/login', async (req, res) => {
       },
     });
 
-    if (!user || !await bcrypt.compare(password, user.password)) {
-      return res.status(400).json({ error: "Invalid credentials." });
-    
-
-      // 로그인 성공 처리 (토큰 발행 등) 필요
+    // 사용자 인증 검증
+    if (user && await bcrypt.compare(password, user.password)) {
       // JWT 생성 (비밀키와 함께)
       const jwt = require('jsonwebtoken');
       const token = jwt.sign({ userId: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-      res.status(200).json({ message: "Login successful!" });
+
+      // 로그인 성공 응답 및 토큰 전송
+      res.status(200).json({ token });
     } else {
+      // 인증 실패 응답
       res.status(401).send('인증 실패: 사용자가 존재하지 않거나 비밀번호가 잘못되었습니다.');
     }
   } catch (error) {
