@@ -16,6 +16,20 @@ app.use(cors({
   credentials: true,
 }));
 
+// 토큰 검증 및 사용자 ID 추출 함수
+const verifyTokenAndGetUserId = (token) => {
+  if (!token) {
+    throw new Error('No token provided');
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    return decoded.userId;
+  } catch (error) {
+    throw new Error('Invalid token');
+  }
+};
+
 async function isUsernameTaken(username) {
   const user = await prisma.user.findUnique({
     where: {
@@ -85,6 +99,64 @@ app.post('/login', async (req, res) => {
     res.status(500).json({ error: "Server error." });
   }
 });
+
+app.get('/api/user-info', async (req, res) => {
+  // 사용자 인증 (토큰 검증 등)
+  // ...
+  try {
+    const token = req.headers.authorization.split(' ')[1]; // 'Bearer [Token]' 형식 가정
+    const userIdFromToken = verifyTokenAndGetUserId(token);
+
+    const user = await prisma.user.findUnique({
+      where: { id: userIdFromToken },
+      select: { username: true, nickname: true, email: true }
+    });
+
+    if (!user) {
+      return res.status(404).send('User not found');
+    }
+    // console.log('User ID from Token:', userIdFromToken); // 로그 추가
+    // console.log('Fetched User:', user); // 로그 추가
+    res.json(user);
+  } catch (error) {
+    console.error(error);
+    res.status(401).send('Unauthorized');
+  }
+  // try {
+  //   const user = await prisma.user.findUnique({
+  //     where: { id: userIdFromToken },
+  //     select: { username: true, nickname: true, email: true }
+  //   });
+  //   res.json(user);
+  // } catch (error) {
+  //   console.error(error);
+  //   res.status(500).json({ error: "Server error." });
+  // }
+});
+
+app.post('/api/diaries', async (req, res) => {
+  try {
+    const token = req.headers.authorization.split(' ')[1]; // 'Bearer [Token]' 형식 가정
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const userIdFromToken = decoded.userId;
+
+    const { text } = req.body;
+    const diary = await prisma.diary.create({
+      data: {
+        text,
+        userId: userIdFromToken, // 사용자 ID를 diary 데이터와 연결
+        isPublic: false // 기본값을 false로 설정
+      }
+    });
+
+    res.status(201).json(diary);
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ error: "Server error." });
+  }
+});
+
+
 
 // Serve static files from the React app
 app.use(express.static(path.join(__dirname, '../client/build')));

@@ -72,6 +72,7 @@ import axios from 'axios';
 import { BrowserRouter as Router, Route, Routes, Link } from 'react-router-dom';
 import Signup from './Signup';
 import Login from './Login';
+import MyPage from './MyPage';
 
 
 const App = () => {
@@ -80,7 +81,13 @@ const App = () => {
   const [diaryEntry, setDiaryEntry] = useState('');
   const [isLoggedIn, setIsLoggedIn] = useState(false);
 
+  // const navigate = useNavigate();
 
+  const handleLogout = () => {
+    localStorage.removeItem('token');
+    setIsLoggedIn(false);
+    // navigate('/');
+  };
   // Fetch a random quote from the server
   const fetchQuote = async () => {
     try {
@@ -112,7 +119,7 @@ const App = () => {
     <Router>
       <div>
         <nav>
-          <Link to="/">Home</Link> |{ !isLoggedIn && <Link to="/signup">Signup</Link>} {!isLoggedIn && <Link to="/login">Login</Link>} {isLoggedIn && <Link to="/logout">Logout</Link>}
+          <Link to="/">Home</Link> |{ !isLoggedIn && <Link to="/signup">Signup</Link>} {!isLoggedIn && <Link to="/login">Login</Link>} {isLoggedIn && <Link to="/mypage">My Page</Link>} {isLoggedIn && <button onClick={handleLogout}>Logout</button>}
         </nav>
         <Routes>
           <Route path="/" element={
@@ -130,7 +137,7 @@ const App = () => {
           } />
           <Route path="/signup" element={<Signup />} />
           <Route path="/login" element={<Login setIsLoggedIn={setIsLoggedIn} />} />
-
+          <Route path="/mypage" element={<MyPage />} />
         </Routes>
       </div> 
     </Router>
