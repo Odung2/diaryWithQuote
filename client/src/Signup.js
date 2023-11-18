@@ -30,7 +30,7 @@ export default function Signup() {
       if (!response.ok) {
         const errorResponse = await response.json();
         console.error('Signup failed:', errorResponse);
-        throw new Error('Signup failed');
+        throw new Error(`Signup failed: ${errorResponse.error}`);
       }
       // Handle success
     } catch (error) {
