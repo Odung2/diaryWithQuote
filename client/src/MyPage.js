@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
+import styles from './MyPage.module.css'; // CSS 파일 임포트
 
 const MyPage = () => {
 const navigate = useNavigate();
@@ -49,16 +50,31 @@ if (isLoading) {
     return <div>Loading...</div>;
 }
 
-return (
-    <div>
-        <h1>My Page</h1>
-        <h2>User Info</h2>
-        <p>Username: {userInfo.username}</p>
-        <p>Nickname: {userInfo.nickname}</p>
-        <p>Email: {userInfo.email || 'Not provided'}</p>
-        <h2>My Diary</h2>
-        <textarea value={diaryEntry} onChange={(e) => setDiaryEntry(e.target.value)} />
-        <button onClick={submitDiaryEntry}>Submit Entry</button>
+return (    
+    <div className={styles.myPageContainer}>
+        <h1 className={styles.myPageHeader}>My Page</h1>
+        <div className={styles.userInfoContainer}>
+        <div className={styles.userInfoRow}>
+            <span className={`material-icons ${styles.userInfoIcon}`}>account_circle</span>
+            <span className={styles.userInfoLabel}>아이디: </span>
+            <span className={styles.userInfoText}>{userInfo.username}</span>
+        </div>
+        <div className={styles.userInfoRow}>
+            <span className={`material-icons ${styles.userInfoIcon}`}>face</span>
+            <span className={styles.userInfoLabel}>별명: </span>
+            <span className={styles.userInfoText}> {userInfo.nickname}</span>
+        </div>
+        <div className={styles.userInfoRow}>
+            <span className={`material-icons ${styles.userInfoIcon}`}>email</span>
+            <span className={styles.userInfoLabel}>이메일: </span>
+            <span className={styles.userInfoText}> {userInfo.email || 'Not provided'}</span>
+        </div>
+    </div>
+        <h2>오늘의 일기 작성하기</h2>
+        <textarea
+            className={styles.diaryTextarea} 
+            value={diaryEntry} onChange={(e) => setDiaryEntry(e.target.value)} />
+        <button className={styles.submitButton} onClick={submitDiaryEntry}>Submit Entry</button>
     </div>
 );
 };
