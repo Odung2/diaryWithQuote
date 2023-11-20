@@ -40,22 +40,27 @@ export default function Login({setIsLoggedIn}) {
     <div>
       <h2>Login</h2>
       <form onSubmit={handleSubmit}>
-        <input
-          type="text"
-          name="username"
-          value={form.username}
-          onChange={handleChange}
-          placeholder="Username"
-          required
-        />
+        <div>
+          <h4>아이디</h4>
+          <input
+            type="text"
+            name="username"
+            value={form.username}
+            onChange={handleChange}
+            placeholder="아이디를 입력하세요."
+            required
+          />
+        </div>
+        <h4>비밀번호</h4>
         <input
           type="password"
           name="password"
           value={form.password}
           onChange={handleChange}
-          placeholder="Password"
+          placeholder="비밀번호를 입력하세요."
           required
         />
+        <br></br>
         <button type="submit">Login</button>
       </form>
     </div>
