@@ -8,6 +8,7 @@ const bcrypt = require('bcrypt');
 const app = express();
 const jwt = require('jsonwebtoken');
 require('dotenv').config();
+const { exec } = require('child_process');
 
 
 const prisma = new PrismaClient();
@@ -24,7 +25,8 @@ const verifyTokenAndGetUserId = (token) => {
 
   try {
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    return decoded.userId;
+    // console.log(decoded);
+    return decoded.id;
   } catch (error) {
     throw new Error('Invalid token');
   }
@@ -87,7 +89,7 @@ app.post('/login', async (req, res) => {
       // JWT 생성 (비밀키와 함께)
       const jwt = require('jsonwebtoken');
       const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, { expiresIn: '1h' });
-
+      // console.log(token);
       // 로그인 성공 응답 및 토큰 전송
       res.status(200).json({ token });
     } else {
@@ -105,8 +107,10 @@ app.get('/api/user-info', async (req, res) => {
   // ...
   try {
     const token = req.headers.authorization.split(' ')[1]; // 'Bearer [Token]' 형식 가정
+    // console.log(token);
     const userIdFromToken = verifyTokenAndGetUserId(token);
 
+    // console.log(userIdFromToken);
     const user = await prisma.user.findUnique({
       where: { id: userIdFromToken },
       select: { username: true, nickname: true, email: true }
@@ -129,7 +133,8 @@ app.post('/api/diaries', async (req, res) => {
     const token = req.headers.authorization.split(' ')[1]; // 'Bearer [Token]' 형식 가정
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
     const userIdFromToken = decoded.userId;
-
+    console.log(decoded);
+    console.log(userIdFromToken);
     const { text } = req.body;
     const diary = await prisma.diary.create({
       data: {
@@ -180,38 +185,24 @@ app.post('/api/createQuote', async (req, res) => {
   
   try {
     // 사용자 인증
-    const token = req.headers.authorization.split(' ')[1];
-    const userId = jwt.verify(token, process.env.JWT_SECRET).userId;
-
-    // // 간단한 명언 생성 로직 (여기서는 미리 정의된 명언을 선택)
-    // const quoteText = "명언 예시 - 유명인"; // 실제 구현에서는 명언 생성 로직을 사용
-    // const quote = await prisma.quote.create({
-    //   data: { text: quoteText, author: "유명인" }
-    // });
-
-    // // 생성된 명언을 일기에 연결
-    // await prisma.userQuote.create({
-    //   data: {
-    //     userId: userId,
-    //     quoteId: quote.id,
-    //     diaryId: diaryId
-    //   }
-    // });
-
-    // res.status(201).send("명언이 생성되었습니다.");
+    // const token = req.headers.authorization.split(' ')[1];
+    // const userId = jwt.verify(token, process.env.JWT_SECRET).id;
 
     exec(`python diarywithquoteml1.py "${diaryText}"`, async (error, stdout, stderr) => {
+      console.log('stdout:', stdout);
+      console.error('stderr::::', stderr);
       if (error) {
         console.error(`exec error: ${error}`);
         return res.status(500).send({error: 'Error generating quote'});
       }
       if (stderr) {
         console.error(`stderr: ${stderr}`);
-        return res.status(500).send({error: 'Error generating quote'});
+        // return res.status(500).send({error: 'Error generating quote'});
       }
   
       // Python 스크립트의 출력에서 명언 추출
       const quoteText = stdout.trim();
+      console.log(quoteText);
       // 명언을 데이터베이스에 저장하고 일기와 연결
       try {
         const quote = await prisma.quote.create({

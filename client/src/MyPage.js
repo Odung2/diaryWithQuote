@@ -18,7 +18,7 @@ useEffect(() => {
         try {   
             const token = localStorage.getItem('token');
             if (!token) {
-                navigate('/login'); // 로그인 페이지로 리디렉션
+                // navigate('/login'); // 로그인 페이지로 리디렉션
                 return;
             }
             const response = await axios.get('/api/user-info', {
@@ -28,14 +28,14 @@ useEffect(() => {
             setIsLoading(false); // 데이터 로딩 완료
         } catch (error) {
             console.error('Error fetching user info', error);
-            navigate('/login'); // 로그인 페이지로 리디렉션
+            // navigate('/login'); // 로그인 페이지로 리디렉션
         }
     };
     const fetchDiaries = async () => {
         try {
             const token = localStorage.getItem('token');
             if (!token) {
-                navigate('/login'); // 로그인 페이지로 리디렉션
+                // navigate('/login'); // 로그인 페이지로 리디렉션
                 return;
             }
             const response = await axios.get('/api/getDiaries', {

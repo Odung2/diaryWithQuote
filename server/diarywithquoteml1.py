@@ -89,6 +89,7 @@ def recommend_quote(diary_text):
 # 명령줄 인자로부터 일기 내용 받기
 if len(sys.argv) > 1:
     diary_text = sys.argv[1]
+    print("Received diary text: ", diary_text)
 else:
     diary_text = "기본 텍스트"
 
