@@ -2,3 +2,5 @@
 /client/node_modules
 /client/public
 package-lock.json
+/client/config
+/client/scripts

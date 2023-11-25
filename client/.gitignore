@@ -22,6 +22,9 @@ npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
 
+/config
+/scripts
+
 
 #ENOSPC: system limit for number of file watechers reached.
 /public
