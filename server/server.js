@@ -76,7 +76,7 @@ app.post('/signup', async (req, res) => {
 // 로그인
 app.post('/login', async (req, res) => {
   const { username, password } = req.body;
-
+  console.log("Login request received:", req.body);
   try {
     const user = await prisma.user.findUnique({
       where: {
@@ -132,7 +132,7 @@ app.post('/api/diaries', async (req, res) => {
   try {
     const token = req.headers.authorization.split(' ')[1]; // 'Bearer [Token]' 형식 가정
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    const userIdFromToken = decoded.userId;
+    const userIdFromToken = verifyTokenAndGetUserId(token);
     console.log(decoded);
     console.log(userIdFromToken);
     const { text } = req.body;
@@ -201,7 +201,10 @@ app.post('/api/createQuote', async (req, res) => {
       }
   
       // Python 스크립트의 출력에서 명언 추출
-      const quoteText = stdout.trim();
+
+      const lines = stdout.trim().split('\n');
+      const quoteText = lines[lines.length - 1];
+      // const quoteText = stdout.trim();
       console.log(quoteText);
       // 명언을 데이터베이스에 저장하고 일기와 연결
       try {
@@ -238,7 +241,7 @@ app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/build/index.html'));
 });
 
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 8000;
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}.`);
 });

@@ -113,7 +113,7 @@ return (
         <button className={styles.submitButton} onClick={submitDiaryEntry}>작성 완료!</button>
         <h2>나의 일기</h2>
         <div className={styles.diaryList}>
-        {diaries.map((diary, index) => (
+        {/* {diaries.map((diary, index) => (
             <div key={index} className={styles.diaryCard}>
             <p className={styles.diaryDate}>
                 {new Date(diary.createdAt).toLocaleDateString()} 작성
@@ -130,7 +130,33 @@ return (
                 </button>
             )}
             </div>
+        ))} */}
+        {diaries.map((diary, index) => (
+            <div key={index} className={styles.diaryCard}>
+                <p className={styles.diaryDate}>
+                    {new Date(diary.createdAt).toLocaleDateString()} 작성
+                </p>
+                <p className={styles.diaryText}>
+                    {diary.text}
+                </p>
+                {diary.userQuotes && diary.userQuotes.length > 0 ? (
+                    <div className={styles.quoteContainer}>
+                        {/* 명언이 있는 경우 표시 */}
+                        <p className={styles.quoteText}>
+                            "{diary.userQuotes[0].quote.text}" - {diary.userQuotes[0].quote.author}
+                        </p>
+                    </div>
+                ) : (
+                    <button 
+                        className={styles.createQuoteButton}
+                        onClick={() => createQuoteForDiary(diary.id, diary.text)}
+                    >
+                        명언 만들기
+                    </button>
+                )}
+            </div>
         ))}
+
         </div>
     </div>
 );
