@@ -99,4 +99,9 @@ font-size: 1.1em;
 color: #333;
 }
 
+.maxLengthWarning{
+    font-size: 1.1em;
+    color: lightcoral;
+}
+
 @import url('https://fonts.googleapis.com/css2?family=Noto+Sans&display=swap');

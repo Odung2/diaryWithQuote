@@ -56,7 +56,7 @@ router.post('/diaries', authMiddleware, async (req, res) => {
     // const decoded = jwt.verify(token, process.env.JWT_SECRET);
     // const userIdFromToken = verifyTokenAndGetUserId(token);
     const userIdFromToken = req.userId;
-    console.log(decoded);
+    // console.log(decoded);
     console.log(userIdFromToken);
     const { text } = req.body;
     const diary = await prisma.diary.create({
@@ -160,9 +160,9 @@ router.post('/createQuote', async (req, res) => {
     }
 });
 
-router.patch('/diaries/:diaryId', authMiddleware, async (req, res) => {
-    const diaryId = parseInt(req.params.diaryId);
-    const { isPublic } = req.body;
+router.patch('/diaries/setpublic', authMiddleware, async (req, res) => {
+    // const diaryId = parseInt(req.params.diaryId);
+    const { diaryId, isPublic } = req.body;
 
     try {
         const updatedDiary = await prisma.diary.update({
@@ -177,6 +177,26 @@ router.patch('/diaries/:diaryId', authMiddleware, async (req, res) => {
     }
 });
 
-module.exports = router;
+router.get('/getPublicDiaries', async (req, res) => {
+    try {
+
+    const diaries = await prisma.diary.findMany({
+        where: { isPublic: true },
+        select: { text: true, createdAt: true,
+        user: {
+            select: { nickname: true } // `user` 객체의 `nickname` 포함
+        }, 
+        userQuotes: {
+            include: {
+                quote: true // `quote` 객체 포함
+            }
+        }, id: true, userId: true, isPublic: true}
+    });
+    res.json(diaries);
+    } catch (error) {
+        res.status(500).send({error: 'Server error'});
+    }
+
+});
 
 module.exports = router;

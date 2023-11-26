@@ -61,3 +61,28 @@
     font-style: italic;
   }
   
+  .diaryList {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.diaryCard {
+  background-color: white;
+border: 1px solid #ddd;
+border-radius: 8px;
+padding: 15px;
+box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.1);
+}
+
+.diaryDate {
+font-size: 0.9em;
+color: #666;
+margin-bottom: 5px;
+}
+
+.diaryText {
+font-size: 1.1em;
+color: #333;
+}

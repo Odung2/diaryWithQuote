@@ -10,6 +10,17 @@ const [userInfo, setUserInfo] = useState({ username: '', nickname: '', email: ''
 const [isLoading, setIsLoading] = useState(true); // 로딩 상태 추가
 const [diaryEntry, setDiaryEntry] = useState('');
 const [diaries, setDiaries] = useState([]);
+const [isMaxLengthReached, setIsMaxLengthReached] = useState(false);
+const maxLength = 2000; // 최대 길이 설정
+
+useEffect(() => {
+    if (diaryEntry.length >= maxLength) {
+        setIsMaxLengthReached(true);
+        alert(`최대 글자 수(${maxLength}자)를 초과할 수 없습니다.`);
+    } else {
+        setIsMaxLengthReached(false);
+    }
+}, [diaryEntry]);
 
 useEffect(() => {
 // 사용자 정보를 불러오는 함수
@@ -50,8 +61,7 @@ useEffect(() => {
         }
 
     };
-        
-    updateDiaryVisibility();
+
     fetchUserInfo();
     fetchDiaries();
 }, [navigate]);
@@ -87,7 +97,8 @@ const createQuoteForDiary = async (diaryId, diaryText, userId) => {
 const updateDiaryVisibility = async (diaryId, isPublic) => {
     try {
         const token = localStorage.getItem('token');
-        const response = await axios.patch(`/api/diaries/${diaryId}`, { isPublic }, {
+        const response = await axios.patch(`/api/diaries/setpublic`, 
+            { diaryId:diaryId, isPublic:isPublic }, {
             headers: { Authorization: `Bearer ${token}` }
         });
         // 서버로부터 업데이트된 일기 정보 받기
@@ -102,6 +113,11 @@ const updateDiaryVisibility = async (diaryId, isPublic) => {
     }
 };
 
+const handleDiaryChange = (e) => {
+    if (e.target.value.length <= maxLength) {
+        setDiaryEntry(e.target.value);
+    }
+};
 
 if (isLoading) {
     return <div>Loading...</div>;
@@ -130,8 +146,15 @@ return (
         <h2>오늘의 일기 작성하기</h2>
         <textarea
             className={styles.diaryTextarea} 
-            value={diaryEntry} onChange={(e) => setDiaryEntry(e.target.value)} />
-        <button className={styles.submitButton} onClick={submitDiaryEntry}>저장하기!</button>
+            value={diaryEntry} onChange={handleDiaryChange} placeholder="오늘의 일기를 써보세요!"/>
+        {!isMaxLengthReached && (
+            <button className={styles.submitButton} onClick={submitDiaryEntry} disabled={isMaxLengthReached}>저장하기!</button>
+        )}    
+        {isMaxLengthReached && (
+            <p className={styles.maxLengthWarning}>
+                최대 글자 수를 초과했습니다. 일기를 저장할 수 없습니다. ㅠㅠ
+            </p>
+        )}
         <h2>나의 일기</h2>
         <div className={styles.diaryList}>
         {diaries.map((diary, index) => (
