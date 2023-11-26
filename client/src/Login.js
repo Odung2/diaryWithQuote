@@ -1,5 +1,4 @@
 // Login.js
-
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom'; // useNavigate 훅 임포트
 import axios from 'axios';
@@ -25,15 +24,21 @@ export default function Login({setIsLoggedIn}) {
       const response = await axios.post('/login', form);
       if (response.status === 200) {
         const token = response.data.token;
+        if (!token) {
+          throw new Error('Token is undefined');
+        }
         localStorage.setItem('token', token);
         setIsLoggedIn(true); // 로그인 상태 설정
+        navigate('/'); // 페이지 리디렉션
+
       }
       
     } catch (error) {
       // Handle errors
+      console.error('Login error:', error);
+
     }
     // Handle success
-    navigate('/'); // 페이지 리디렉션
   };
 
   return (
@@ -61,7 +66,7 @@ export default function Login({setIsLoggedIn}) {
           required
         />
         <br></br>
-        <button type="submit">Login</button>
+        <button type="submit">로그인하기</button>
       </form>
     </div>
   );

@@ -12,6 +12,9 @@ Original file is located at
 from transformers import pipeline
 import numpy as np
 import sys
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding = 'utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding = 'utf-8')
 
 # 텍스트 분류 파이프라인 초기화
 # classifier = pipeline("zero-shot-classification")
@@ -55,14 +58,14 @@ quotes_database = [
 def recommend_quote(diary_text):
     # 일기 텍스트와 태그 간의 유사성 평가
     result = classifier(diary_text, tags)
-    print(result)
+    # print(result)
     labels = result['labels']
     scores = result['scores']
     sorted_tags = [tag for _, tag in sorted(zip(scores, labels), reverse=True)]
 
     # 상위 3개 태그 추출
     top_tags = sorted_tags[:3]
-    print(top_tags)
+    # print(top_tags)
 
     # 명언 매칭
     best_match = None
@@ -89,6 +92,7 @@ def recommend_quote(diary_text):
 # 명령줄 인자로부터 일기 내용 받기
 if len(sys.argv) > 1:
     diary_text = sys.argv[1]
+    # print("Received diary text: ", diary_text)
 else:
     diary_text = "기본 텍스트"
 

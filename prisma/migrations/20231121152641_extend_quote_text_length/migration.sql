@@ -1,0 +1,2 @@
+-- AlterTable
+ALTER TABLE `Diary` MODIFY `text` VARCHAR(5000) NOT NULL;

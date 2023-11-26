@@ -1,6 +1,3 @@
-// This is your Prisma schema file,
-// learn more about it in the docs: https://pris.ly/d/prisma-schema
-
 generator client {
   provider = "prisma-client-js"
 }
@@ -11,43 +8,48 @@ datasource db {
 }
 
 model User {
-  id        Int       @id @default(autoincrement())
-  username  String    @unique //login용 아이디
-  nickname  String    // 공개되는 닉네임
-  password  String    // This should be hashed
-  email     String?   
-  createdAt DateTime  @default(now())
-  diaries   Diary[]
+  id         Int         @id @default(autoincrement())
+  username   String      @unique
+  nickname   String
+  password   String
+  email      String?
+  createdAt  DateTime    @default(now())
+  diaries    Diary[]
   userQuotes UserQuote[]
 }
 
 model Quote {
-  id        Int       @id @default(autoincrement())
-  text      String
-  author    String?
-  createdAt DateTime  @default(now())
+  id         Int         @id @default(autoincrement())
+  text       String      @db.VarChar(1000)
+  author     String?
+  createdAt  DateTime    @default(now())
   userQuotes UserQuote[]
 }
 
 model Diary {
-  id        Int       @id @default(autoincrement())
-  text      String
-  createdAt DateTime  @default(now())
-  updatedAt DateTime? @updatedAt
-  isPublic  Boolean   @default(false) // 공개/비공개를 위한 필드, 기본: 비공개
-  user      User      @relation(fields: [userId], references: [id])
-  userId    Int
+  id         Int         @id @default(autoincrement())
+  text       String      @db.VarChar(5000) // 또는 필요한 길이로 조정
+  createdAt  DateTime    @default(now())
+  updatedAt  DateTime?   @updatedAt
+  isPublic   Boolean     @default(false)
+  userId     Int
+  user       User        @relation(fields: [userId], references: [id])
   userQuotes UserQuote[]
-}
 
+  @@index([userId], map: "Diary_userId_fkey")
+}
 
 model UserQuote {
   id         Int      @id @default(autoincrement())
   selectedAt DateTime @default(now())
-  user       User     @relation(fields: [userId], references: [id])
   userId     Int
-  quote      Quote    @relation(fields: [quoteId], references: [id])
   quoteId    Int
-  diary      Diary?    @relation(fields: [diaryId], references: [id])
   diaryId    Int?
+  diary      Diary?   @relation(fields: [diaryId], references: [id])
+  quote      Quote    @relation(fields: [quoteId], references: [id])
+  user       User     @relation(fields: [userId], references: [id])
+
+  @@index([diaryId], map: "UserQuote_diaryId_fkey")
+  @@index([quoteId], map: "UserQuote_quoteId_fkey")
+  @@index([userId], map: "UserQuote_userId_fkey")
 }
