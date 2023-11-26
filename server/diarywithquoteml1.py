@@ -12,6 +12,9 @@ Original file is located at
 from transformers import pipeline
 import numpy as np
 import sys
+import io
+sys.stdout = io.TextIOWrapper(sys.stdout.detach(), encoding = 'utf-8')
+sys.stderr = io.TextIOWrapper(sys.stderr.detach(), encoding = 'utf-8')
 
 # 텍스트 분류 파이프라인 초기화
 # classifier = pipeline("zero-shot-classification")

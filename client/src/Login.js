@@ -66,7 +66,7 @@ export default function Login({setIsLoggedIn}) {
           required
         />
         <br></br>
-        <button type="submit">Login</button>
+        <button type="submit">로그인하기</button>
       </form>
     </div>
   );

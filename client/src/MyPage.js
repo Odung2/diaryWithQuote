@@ -43,14 +43,15 @@ useEffect(() => {
                 headers: { Authorization: `Bearer ${token}` }
             });
             
-            // console.log(response.data); // 응답 로깅
+            console.log(response.data); // 응답 로깅
             setDiaries(response.data);
         } catch (error) {
             console.error('Error fetching diaries', error);
         }
 
     };
-
+        
+    updateDiaryVisibility();
     fetchUserInfo();
     fetchDiaries();
 }, [navigate]);
@@ -67,10 +68,11 @@ try {
 }
 };
 
-const createQuoteForDiary = async (diaryId, diaryText) => {
+const createQuoteForDiary = async (diaryId, diaryText, userId) => {
     try {
         // 서버에 명언 생성 요청 보내기
-        const response = await axios.post('/api/createQuote', { diaryId, diaryText });
+        console.log(diaryId);
+        const response = await axios.post('/api/createQuote', { diaryId, diaryText, userId });
 
         // 성공적으로 명언이 생성되고 연결되었다는 메시지 처리
         console.log(response.data.message);
@@ -78,6 +80,25 @@ const createQuoteForDiary = async (diaryId, diaryText) => {
     } catch (error) {
         console.error('Error creating quote:', error);
         // 에러 처리 로직
+    }
+};
+
+// 일기 공개 상태 업데이트 함수
+const updateDiaryVisibility = async (diaryId, isPublic) => {
+    try {
+        const token = localStorage.getItem('token');
+        const response = await axios.patch(`/api/diaries/${diaryId}`, { isPublic }, {
+            headers: { Authorization: `Bearer ${token}` }
+        });
+        // 서버로부터 업데이트된 일기 정보 받기
+        const updatedDiary = response.data;
+
+        // 로컬 상태 업데이트
+        setDiaries(prevDiaries => prevDiaries.map(diary => 
+            diary.id === diaryId ? { ...diary, isPublic: updatedDiary.isPublic } : diary
+        ));
+    } catch (error) {
+        console.error('Error updating diary visibility', error);
     }
 };
 
@@ -110,32 +131,22 @@ return (
         <textarea
             className={styles.diaryTextarea} 
             value={diaryEntry} onChange={(e) => setDiaryEntry(e.target.value)} />
-        <button className={styles.submitButton} onClick={submitDiaryEntry}>작성 완료!</button>
+        <button className={styles.submitButton} onClick={submitDiaryEntry}>저장하기!</button>
         <h2>나의 일기</h2>
         <div className={styles.diaryList}>
-        {/* {diaries.map((diary, index) => (
-            <div key={index} className={styles.diaryCard}>
-            <p className={styles.diaryDate}>
-                {new Date(diary.createdAt).toLocaleDateString()} 작성
-            </p>
-            <p className={styles.diaryText}>
-                {diary.text}
-            </p>
-            {!diary.userQuotes?.length && (
-                <button 
-                    className={styles.createQuoteButton}
-                    onClick={() => createQuoteForDiary(diary.id, diary.text)}
-                >
-                    명언 만들기
-                </button>
-            )}
-            </div>
-        ))} */}
         {diaries.map((diary, index) => (
             <div key={index} className={styles.diaryCard}>
                 <p className={styles.diaryDate}>
                     {new Date(diary.createdAt).toLocaleDateString()} 작성
                 </p>
+                <label>
+                    공개
+                    <input
+                        type="checkbox"
+                        checked={diary.isPublic}
+                        onChange={e => updateDiaryVisibility(diary.id, e.target.checked)}
+                    />
+                </label>
                 <p className={styles.diaryText}>
                     {diary.text}
                 </p>
@@ -143,13 +154,14 @@ return (
                     <div className={styles.quoteContainer}>
                         {/* 명언이 있는 경우 표시 */}
                         <p className={styles.quoteText}>
-                            "{diary.userQuotes[0].quote.text}" - {diary.userQuotes[0].quote.author}
+                            "{diary.userQuotes[0].quote.text}"
                         </p>
+                        
                     </div>
                 ) : (
                     <button 
                         className={styles.createQuoteButton}
-                        onClick={() => createQuoteForDiary(diary.id, diary.text)}
+                        onClick={() => createQuoteForDiary(diary.id, diary.text, diary.userId)}
                     >
                         명언 만들기
                     </button>
