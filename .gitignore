@@ -4,3 +4,4 @@
 package-lock.json
 /client/config
 /client/scripts
+.env
