@@ -18,6 +18,8 @@ const App = () => {
   const handleLogout = () => {
     localStorage.removeItem('token');
     setIsLoggedIn(false);
+    window.location.href = '/';
+
     // navigate('/');
   };
 
